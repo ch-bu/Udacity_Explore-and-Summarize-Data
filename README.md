@@ -1,1 +1,2 @@
-# Udacity_Explore-and-Summarize-Data
+Udacity: Explore and Summarize Data
+============================
