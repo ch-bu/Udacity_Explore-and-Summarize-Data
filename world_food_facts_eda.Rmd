@@ -1,5 +1,11 @@
-TITLE by YOUR_NAME_HERE
+World Food Facts by Christian Burkhart
 ========================================================
+
+
+The **World Food Facts** dataset is a french initiative of a collection of food products around the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturar can freely add products. Every row within in the database represents a food product. 
+
+In this Exploratory Data Analysis I will try to get some insights into interesting patterns of food that is eaten around the world. 
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
 # Load all of the packages that you end up using
@@ -10,11 +16,12 @@ TITLE by YOUR_NAME_HERE
 # You should set echo=FALSE for all code chunks in your file.
 
 library(ggplot2)
+library(dplyr)
 ```
 
-```{r echo=FALSE, Load_the_Data}
-# Load the Data
-
+```{r echo=FALSE, cache=TRUE, Load_the_Data}
+setwd("~/Repositories/Udacity_Explore-and-Summarize-Data")
+food_data <- read.csv(file.path("data", "FoodFacts.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
 ```
 
 # Univariate Plots Section
@@ -25,6 +32,53 @@ library(ggplot2)
 # Univariate Analysis
 
 ### What is the structure of your dataset?
+
+```{r, echo=FALSE}
+dim(food_data)
+```
+
+There are in total 65503 food products in the dataset. Each food product has 159 variables. Not every variable will be of interest for this analysis. Therefore I will select the dataset for variables that seem to be of interest. 
+
+```{r, cache=TRUE}
+food_data_selection <- select(food_data, product_name, generic_name, quantity,
+                              brands, categories, categories_en, origins, 
+                              origins_tags, manufacturing_places, countries_en,
+                              serving_size, additives_en, nutrition_grade_uk,
+                              nutrition_grade_fr, pnns_groups_1, pnns_groups_2,
+                              states_en, main_category_en, energy_100g,
+                              energy_from_fat_100g, fat_100g, saturated_fat_100g,
+                              monounsaturated_fat_100g, polyunsaturated_fat_100g, 
+                              omega_3_fat_100g, omega_6_fat_100g, omega_9_fat_100g,
+                              trans_fat_100g, cholesterol_100g, carbohydrates_100g,
+                              sugars_100g, sucrose_100g, glucose_100g, fructose_100g,
+                              lactose_100g, maltose_100g, fiber_100g, proteins_100g,
+                              salt_100g, alcohol_100g, vitamin_a_100g, 
+                              vitamin_d_100g, vitamin_e_100g, vitamin_k_100g, 
+                              vitamin_c_100g, vitamin_b1_100g, vitamin_b2_100g, 
+                              vitamin_b6_100g, vitamin_b9_100g, vitamin_b12_100g,
+                              caffeine_100g, nutrition_score_fr_100g, 
+                              nutrition_score_uk_100g)
+```
+
+```{r, echo=FALSE}
+str(food_data_selection)
+```
+
+The selected dataset now contains  variables. For further analysis it would be good to save the columns that can be grouped together.
+
+```{r}
+fat_columns <- c(22:28)
+omega_fat_columns <- c(25:27)
+vitamin_columns <- c(41:50)
+```
+
+I will focus my analysis on products from Germany. Living in Germany I am interested in the products that I find in the supermarket. 
+
+```{r}
+food_data_germany <- filter(food_data_selection, countries_en == "Germany")
+```
+
+There are  products in this dataset.
 
 ### What is/are the main feature(s) of interest in your dataset?
 
