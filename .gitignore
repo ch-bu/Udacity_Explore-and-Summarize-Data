@@ -2,3 +2,4 @@ data/FoodFacts.csv
 world_food_facts_eda_cache/
 .RData
 .Rhistory
+world_food_facts_eda_files/
