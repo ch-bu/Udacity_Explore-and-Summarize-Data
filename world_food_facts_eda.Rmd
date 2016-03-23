@@ -1,8 +1,13 @@
+---
+output: 
+  html_document: 
+    theme: flatly
+---
 World Food Facts by Christian Burkhart
 ========================================================
 
 
-The **World Food Facts** dataset is a french initiative of food products around the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturar can freely add products.
+The **World Food Facts** dataset is a french initiative of food products around the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturers can freely add products.
 
 In this Exploratory Data Analysis I will try to get some insights into the food products of Germany. Being from Germany I am interested in the nutritional value of the products found in the German supermarket.
 
@@ -121,7 +126,7 @@ ggplot(nutrition_score_dataframe, aes(x = value, fill = variable)) +
     labs(x = "Nutrional Value")
 ```
 
-Obviously the variables are not drastically different from another. For further analysis I will stick to the **French**.
+Obviously the variables are not drastically different from another. For further analysis I will stick to the **French** system.
 
 From a first glimpse at the nutritional value, the distribution looks a little bit **bimodal**. There is a high peak at around a score of 0. These might be water products that are neither nutritional valuable nor non-valuable. Another peak seems to be around a score of 15. 
 
@@ -141,21 +146,71 @@ ggplot(food_germany, aes(x = nutrition_score_fr_100g)) +
 
 **Sugary** snacks obviously are not very healthy. Appart from sugary snacks there is no product type that is of bad nutritional value per se. **Cereals and potatoes** seem to be beneficial for health. The same goes for **Fruits and vegetables**. **Milk and dairy products** have a bimodal distribution. This indicates that half of these products are not very healthy. **Beverages** by and large seem to be reasonably good. The peak of the distribution might be because of **water products**. 
 
+## Other variables
+
+```{r, echo=FALSE}
+food_germany$kcal_100g <- food_germany$energy_100g * 0.239006
+histogram_helper(food_germany$kcal_100g, "kcal_100g", bwidth = 10)
+```
+
+Energy in food is most often measured in **kilojoule**. Customers are usually more accustomed to **kilocalories**. Therefore I created a new variable **kcal_100g** that used the conversion of the following website: http://www.rapidtables.com/convert/energy/kj-to-kcal.htm. 
+
+The distribution has three peaks and is skewed left. The mean is `r mean(food_germany$kcal_100g, na.rm = TRUE)`. 
+
+```{r, echo=FALSE}
+histogram_helper(food_germany$salt_100g, "salt_100g", bwidth = 1)
+```
+
+There is not much **salt** in most products. Just very few have a lot of salt. I reckon these are salt products :) 
+
+It would be also interesting to find out which brands produce most products.
+
+```{r, echo=FALSE}
+common_brands_vector <- sort(table(food_germany$brands), decreasing = TRUE)[2:30]
+common_brands_names <- names(common_brands_vector)
+common_brands_df <- data.frame(brands = common_brands_names, frequency = common_brands_vector)
+common_brands_df <- transform(common_brands_df, brands = reorder(brands, -frequency))
+
+ggplot(common_brands_df, aes(x = brands, y = frequency)) + 
+  geom_bar(stat = "identity", fill = color_fill, color = color_border) +
+   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+Most products sold in Germany are made by **Gut & Günstig**. **Alnature** comes in second place. 
+
 # Univariate Analysis
 
 ### What is the structure of your dataset?
+There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset. 
 
+```{r, echo=FALSE}
+apply(food_germany, 2, function(x) sum(is.na(x)) / length(x))
+```
+
+Many features do not contain any missing values. Most features that contain nutritional values contain missing values at around 30%. 
+
+```{r, echo=FALSE}
+glimpse(food_germany)
+```
+
+The dataset contains factors and numerics. The factor's level differ heavily. There are features with just 6 levels and features with over 20,000 levels. 
 
 
 ### What is/are the main feature(s) of interest in your dataset?
 
+The main features of the dataset are features that contain information that is relevant for a healthy diet. These are all **macronutritions**, **nutritional_score_fr_100g**, and **kcal_100g**.
+
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
+It would be very interesting to search for patterns that depend on the **brands** and the product groups (**pnns_group_1**). There might be brands that produce products that tend to be unhealty or healthy. It would be also interesting to find out what makes some products healthier than others. We already saw that **cereals** and **fruit and vegetables** are nutritionally valuable. But why? We might investigate their **macronutrition distribution**.
 
 ### Did you create any new variables from existing variables in the dataset?
+I created a new variable **kcal_100g**. I am more accustomed to kcal than kilojoule as an indicator of energy. In order to find the most common **brands** I created the dataframe **common_brands_df**. 
+
 
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-
-
+The dataset initially had too many features. I reduced the dataset mainly to features that contain less than 40% of missing values. I also only selected products from Germany as these are of special interest for my analysis. 
+I changed the variable **pnns_groups_1** with some regex to make it more readable and in order to catch spelling mistakes. 
 
 # Bivariate Plots Section
 ```{r echo=FALSE, Bivariate_Plots}
