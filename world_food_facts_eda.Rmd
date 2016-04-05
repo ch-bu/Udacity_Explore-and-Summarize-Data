@@ -55,9 +55,11 @@ scatterplot_ingredients <- function(xvariable, yvariable, xl, yl) {
   # Returns:
   #  A ggplot2 scatterplot.
   
-  scat <- ggplot(food_germany, aes(x = xvariable, y = yvariable)) + 
+  scat <- ggplot(NULL, aes(x = xvariable, y = yvariable)) +
     geom_point(color = color_fill) +
-    labs(xlab = xl, ylab = yl)
+    xlab(xl) +
+    ylab(yl)
+    #labs(xlab = xl, ylab = yl)
 
   return(scat)
 }
@@ -270,7 +272,8 @@ round(cor(food_germany[, c(12:21)], use = "complete.obs"), 2)
 Looking at the scatterplots there is an interesting pattern. Some products seem to contain a lot of protein and a tiny amount of carbohydrates and fat. 
 
 ```{r Scatterplot fat and protein, echo=FALSE}
-scatterplot_ingredients(food_germany$fat_100g, food_germany$proteins_100g, "fat_100g", "proteins_100g")
+scatterplot_ingredients(food_germany$fat_100g, food_germany$proteins_100g, 
+                        "fat_100g", "proteins_100g")
 ```
 
 When we plot **fat** and **protein** two interesting patterns emerge: (1) **Bodybuilding products** are high in protein but very low in fat. (2) Olive oils are on the other extreme. They are very high in fat but low in protein.
@@ -286,7 +289,8 @@ When we plot **fat** and **protein** two interesting patterns emerge: (1) **Body
 Let us have a look at **fat** and **carbohydrates**.
 
 ```{r Scatterplot fat and carbohydrates, echo=FALSE}
-scatterplot_ingredients(food_germany$fat_100g, food_germany$carbohydrates_100g)
+scatterplot_ingredients(food_germany$fat_100g, food_germany$carbohydrates_100g,
+                        xl = "fat_100g", yl = "carbohydrates_100g")
 ```
 
 There are no special food groups in this scatterplot. What is interesting is the **hole** inside the scatterplot. Very few products contain around 25% of both protein and fat.
@@ -294,16 +298,20 @@ There are no special food groups in this scatterplot. What is interesting is the
 What about **carbohydrates** and **protein**?
 
 ```{r Scatterplot carbohydrates and protein, echo=FALSE}
-scatterplot_ingredients(food_germany$carbohydrates_100g, food_germany$proteins_100g)
+scatterplot_ingredients(food_germany$carbohydrates_100g, food_germany$proteins_100g,
+                        "carbohydrates_100g", "proteins_100g")
 ```
 
 Again we can find the same pattern. The **bodybuilding products** are very high in protein but low in carbohydrates. Apart from that there is nothing particularly special about the dataset. 
 
 ```{r Scatterplot nutrional value and fat, echo=FALSE}
-scatterplot_ingredients(food_germany$nutrition_score_fr_100g, food_germany$saturated_fat_100g)
+scatterplot_ingredients(food_germany$nutrition_score_fr_100g, 
+                        food_germany$saturated_fat_100g,
+                        "nutrition_score_fr_100g",
+                        "saturated_fat_100g")
 ```
 
-***Saturated fact** is often associates with an unhealthy diet. **Coconut oil** and **coconut fat** are both high in saturated fat and nutritional score. 
+**Saturated fact** is often associates with an unhealthy diet. **Coconut oil** and **coconut fat** are both high in saturated fat and nutritional score. 
 
 ```{r Products high in saturated fat and nutritional score, echo=FALSE}
 (high_saturated_fat_nutritional_score <- filter(food_germany, nutrition_score_fr_100g > 18, saturated_fat_100g > 75)$product_name)
@@ -312,17 +320,37 @@ scatterplot_ingredients(food_germany$nutrition_score_fr_100g, food_germany$satur
 What about **saturated fat** and **fat**?
 
 ```{r Scatterplot saturated fat and fat, echo=FALSE}
-scatterplot_ingredients(food_germany$fat_100g, food_germany$saturated_fat_100g)
+scatterplot_ingredients(food_germany$fat_100g, food_germany$saturated_fat_100g,
+                        "fat_100g", "saturated_fat_100g")
 ```
 
+Most products contain few fat and and saturated fat. Two products seem to contain a high amount of saturated fat. 
 
+```{r Products high in saturated fat, echo=FALSE}
+(high_saturated_fat <- filter(food_germany, saturated_fat_100g > 75,
+                              fat_100g > 95)$product_name)
+```
+
+Again, this is our **coconut oil** and **coconut fat**.
 
 
 # Bivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
+Nutritional data all fall within a diagnoal of a scatterplot. As the macronutritions features all add up to maximal 100g the features can not add up above 100g. 
+
+Linear relationsships do not occur. Almost all relationships are positive. Most of these relationships are small. 
+
+When I plotted fat and carbohydrates with protein some products cluster around a high protein level with a low level of the other two macronutritions. These are bodybuilding products as muscles need protein to grow. 
+
+**Products high in saturated fat** usually have a low nutrition score. This is in line with the usually recommendation to avoid saturated fats. 
+
+Most products that contain **fat** do not contain a high amount of **saturated fat**. Coconut oil is one exception. It even as a high nutrition score as is evident in the scatterplot of saturated fat and nutrition score. 
+
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
+
+
 
 ### What was the strongest relationship you found?
 
