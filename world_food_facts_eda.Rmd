@@ -8,7 +8,7 @@ World Food Facts by Christian Burkhart
 ========================================================
 
 
-The **World Food Facts** dataset is a french initiative of food products around the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturers can freely add products.
+The **World Food Facts** dataset is a french initiative. It tries to collect food products from all over the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturers can freely add products.
 
 In this Exploratory Data Analysis I will try to get some insights into the food products of Germany. Being from Germany I am interested in the nutritional value of the products found in the German supermarket.
 
@@ -53,7 +53,7 @@ scatterplot_ingredients <- function(xvariable, yvariable, xl, yl) {
   #  ylab: String for the y-axis.
   #
   # Returns:
-  #  A ggplot2 scatterplot.
+  #  ggplot2 scatterplot.
   
   scat <- ggplot(NULL, aes(x = xvariable, y = yvariable)) +
     geom_point(color = color_fill) +
@@ -64,7 +64,27 @@ scatterplot_ingredients <- function(xvariable, yvariable, xl, yl) {
   return(scat)
 }
 
+density_plot <- function(xvariable, fill, xl) {
+  # Renders a density plots of a variable with different
+  # factors
+  #
+  # Args:
+  #  xvariable: The variable for the x-axis.
+  #  fill: A factor variable.
+  #  xlab: String for the x-axis.
+  #
+  # Returns:
+  #  Density plots
+  
+  ggplot(food_germany, aes(x = xvariable, fill = fill)) +
+    geom_density(alpha = 0.4) +
+    xlab(xl) +
+    ylab("density")
+}
+
+
 ```
+
 
 ```{r Load the data, echo=FALSE, cache=TRUE}
 setwd("~/Repositories/Udacity_Explore-and-Summarize-Data")
@@ -95,6 +115,7 @@ na_variables <- food_data_germany %>%
   filter(perc_na > .4) %>%
   as.data.frame
 ```
+
 
 ```{r Filter important variables, echo=FALSE, warning=FALSE, cache=TRUE}
 food_germany <- select(food_data_germany, product_name, generic_name,
@@ -170,13 +191,10 @@ Let us dive deeper into the nutritional value of different food categories. The 
 food_germany$pnns_groups_1 <- gsub("^([a-z])(\\w+)", "\\U\\1\\L\\2", food_germany$pnns_groups_1, perl = TRUE)
 food_germany$pnns_groups_1 <- as.factor(gsub("-", " ", food_germany$pnns_groups_1))
 
-ggplot(food_germany, aes(x = nutrition_score_fr_100g)) +
-  geom_histogram(binwidth = 2, fill = color_fill, colour = color_border) +
-    labs(x = "Nutrional Value") +
-    facet_wrap(~ pnns_groups_1)
+# Lowercase variables
+food_germany$pnns_groups_1 <- gsub(pattern = '([[:upper:]])', perl = TRUE, replacement = '\\L\\1', food_germany$pnns_groups_1)
+food_germany$pnns_groups_2 <- gsub(pattern = '([[:upper:]])', perl = TRUE, replacement = '\\L\\1', food_germany$pnns_groups_2)
 ```
-
-**Sugary** snacks obviously are not very healthy. Appart from sugary snacks there is no product type that is of bad nutritional value per se. **Cereals and potatoes** seem to be beneficial for health. The same goes for **Fruits and vegetables**. **Milk and dairy products** have a bimodal distribution. This indicates that half of these products are not very healthy. **Beverages** by and large seem to be reasonably good. The peak of the distribution might be because of **water products**. 
 
 ## Other variables
 
@@ -359,9 +377,91 @@ Most products that contain **fat** do not contain a high amount of **saturated f
 
 # Multivariate Plots Section
 
-```{r echo=FALSE, Multivariate_Plots}
 
+```{r Density plot carbohydrates food category, echo=FALSE}
+density_plot(food_germany$carbohydrates_100g, food_germany$pnns_groups_1, "carbohydrates_100g")
 ```
+
+Suggary snacks seem to contain more carbohydrates. Let's have a look at sugars
+
+```{r Density plot sugars food category, echo=FALSE}
+density_plot(food_germany$sugars_100g, food_germany$pnns_groups_1, "sugars_100g")
+```
+
+```{r Density plot proteins food category, echo=FALSE}
+density_plot(food_germany$proteins_100g, food_germany$pnns_groups_1, "proteins_100g")
+```
+
+```{r Density plot fat food category, echo=FALSE}
+density_plot(food_germany$fat_100g, food_germany$pnns_groups_1, "fat_100g")
+```
+
+```{r Density plot proteins nutrition_grade_fr, echo=FALSE}
+density_plot(food_germany$proteins_100g, food_germany$nutrition_grade_fr, "proteins_100g")
+```
+
+```{r Filter data frame for common brands, echo=FALSE}
+food_types <- filter(food_germany, pnns_groups_1 %in% pnns_groups_1[! pnns_groups_1 %in% c("unknown", "")])
+food_common <- filter(food_types, brands %in% common_brands_names[c(1:5)])
+```
+
+```{r Kilocalories of different food groups, echo=FALSE}
+ggplot(food_types, aes(x = kcal_100g, fill = pnns_groups_1)) +
+  geom_density(alpha = .5)
+```
+
+
+```{r Nutritional score of most common brands, echo=FALSE}
+ggplot(food_common, aes(x = nutrition_score_fr_100g, fill = brands)) +
+    geom_density(alpha = 0.4) +
+    labs(x = "nutrition_score_fr_100g")
+```
+
+```{r Nutritional Score of beverages, echo=FALSE}
+# Get rows containing beverages
+beverage_rows_pnns_1 <- grep("beverages", food_germany$pnns_groups_1)
+beverage_rows_pnns_2 <- grep("beverages", food_germany$pnns_groups_2)
+
+# Create new data frame
+beverages <- food_germany[unique(c(beverage_rows_pnns_1, beverage_rows_pnns_2)), ]
+
+# Get alcoholic beverages
+alcohol_beverages <- grep("alcohol", beverages$pnns_groups_2)
+
+# Generate vector of alcoholic beverages
+alcohol <- c()
+for (i in c(1:nrow(beverages))) {
+  if (i %in% alcohol_beverages) {
+    alcohol <- c(alcohol, "alcoholic")
+  } else {
+    alcohol <- c(alcohol, "non-alcoholic")
+  }
+}
+
+# Add vector to beverages
+beverages$alcohol <- as.factor(alcohol)
+
+# Plot beverages
+ggplot(beverages, aes(x = nutrition_score_fr_100g)) +
+  geom_density(fill = color_fill) +
+  facet_grid(~ alcohol)
+```
+
+
+```{r Nutrional score of product types, echo=FALSE}
+# Filter products types for meaningful types
+common_types <- filter(food_germany, pnns_groups_1 %in% pnns_groups_1[! pnns_groups_1 %in% c("unknown", "")])
+
+# Plot most common
+ggplot(common_types, aes(x = nutrition_score_fr_100g)) +
+  geom_histogram(binwidth = 2, fill = color_fill, colour = color_border) +
+    labs(x = "Nutrional Value") +
+    facet_wrap(~ pnns_groups_1)
+```
+
+**Sugary** snacks obviously are not very healthy. Appart from sugary snacks there is no product type that is of bad nutritional value per se. **Cereals and potatoes** seem to be beneficial for health. The same goes for **Fruits and vegetables**. **Milk and dairy products** have a bimodal distribution. This indicates that half of these products are not very healthy. **Beverages** by and large seem to be reasonably good. The peak of the distribution might be because of **water products**. 
+
+
 
 # Multivariate Analysis
 
