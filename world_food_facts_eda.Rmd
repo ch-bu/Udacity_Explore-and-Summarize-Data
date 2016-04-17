@@ -19,12 +19,11 @@ library(dplyr)
 library(reshape2)
 ```
 
-```{r Helper variables, echo=FALSE}
-color_fill <- "#CD6771"
-color_two <- "#0D5047"
-color_border <- "#F6A4AC"
+```{r Constants, echo=FALSE}
+COLOR_FILL<- "#CD6771"
+COLOR_TWO <- "#0D5047"
+COLOR_BORDER <- "#F6A4AC"
 ```
-
 
 ```{r Helper functions, echo=FALSE}
 histogram_helper <- function(variable, xlab, bwidth) {
@@ -38,7 +37,7 @@ histogram_helper <- function(variable, xlab, bwidth) {
   # Returns:
   #  A ggplot2 histogram
   histogram <- ggplot(food_data_germany, aes(variable)) +
-    geom_histogram(binwidth = bwidth, fill = color_fill, colour = color_border) +
+    geom_histogram(binwidth = bwidth, fill = COLOR_FILL, colour = COLOR_BORDER) +
     labs(x = xlab)
   return(histogram)
 }
@@ -56,7 +55,7 @@ scatterplot_ingredients <- function(xvariable, yvariable, xl, yl) {
   #  ggplot2 scatterplot.
   
   scat <- ggplot(NULL, aes(x = xvariable, y = yvariable)) +
-    geom_point(color = color_fill) +
+    geom_point(color = COLOR_FILL) +
     xlab(xl) +
     ylab(yl)
     #labs(xlab = xl, ylab = yl)
@@ -81,114 +80,70 @@ density_plot <- function(xvariable, fill, xl) {
     xlab(xl) +
     ylab("density")
 }
-
-
 ```
 
 
-```{r Load the data, echo=FALSE, cache=TRUE}
+```{r Load data, echo=FALSE, cache=TRUE}
 setwd("~/Repositories/Udacity_Explore-and-Summarize-Data")
 food_data <- read.csv(file.path("data", "FoodFacts.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
-```
-
-# Data Cleaning
-```{r Dimensions of data frame, echo=FALSE}
-dim(food_data)
-```
-
-There are in total `r nrow(food_data)` food products in the dataset. Each food product has `r ncol(food_data)` variables. Not every variable will be of interest for this analysis. I will focus my analysis on products from Germany.
-
-```{r Filter dataframe for german entries, echo=FALSE}
 food_data_germany <- filter(food_data, countries_en == "Germany")
 ```
 
-When I filter the database for German products the entire database is reduced `r nrow(food_data_germany)` products. In order to select variables that contain meaningful information we have to filter the dataset for NAs. Variables with a lot of NAs should not be included in the analysis. For this analysis I will set the cutoff for variables that have less than 40% of NAs.
+
+# Data Cleaning
+There are in total `r nrow(food_data)` food products in the dataset. Each food product has `r ncol(food_data)` variables. Not every variable will be of interest for this analysis. I will focus my analysis on products from **products from Germany**. When I filter the database for German products the entire database is reduced `r nrow(food_data_germany)` products. In order to select variables that contain meaningful information we have to filter the dataset for NAs. Variables with a lot of **NAs** should not be included in the analysis. For this analysis I will remove features with more than 40% of NAs.
 
 ```{r NAs, echo=FALSE, warning=FALSE}
 # Code taken and accustomed from
 # https://www.kaggle.com/jelaurent/d/openfoodfacts/world-food-facts/openfoodfacts-exploring-the-dataset/notebook
-na_variables <- food_data_germany %>%
+(na_variables <- food_data_germany %>%
   melt(measure.vars = 1:159) %>%
   group_by(variable) %>% 
   summarize(perc_na = round(sum(is.na(value))/length(value), digits = 3)) %>%
   arrange(desc(perc_na)) %>%
-  filter(perc_na > .4) %>%
-  as.data.frame
+  filter(perc_na < .4) %>%
+  as.data.frame)
 ```
 
+Most features do contain a lot of missing values. Out of `r ncol(food_data_germany)`, `r nrow(na_variables)` meet the NA criteria (less than 40%). Not all of these features are of interest.
 
-```{r Filter important variables, echo=FALSE, warning=FALSE, cache=TRUE}
+```{r Filter data frame, echo=FALSE, warning=FALSE, cache=TRUE}
 food_germany <- select(food_data_germany, product_name, generic_name,
-                                      brands, categories_en, origins, pnns_groups_1,
-                                      pnns_groups_2, manufacturing_places, additives_en,
-                                      nutrition_grade_fr, main_category_en, energy_100g, 
-                                      fat_100g, saturated_fat_100g, carbohydrates_100g, 
-                                      sugars_100g, proteins_100g, salt_100g, 
-                                      nutrition_score_fr_100g, nutrition_score_uk_100g)
+                       brands, brands_tags, categories_en, origins, pnns_groups_1, 
+                       pnns_groups_2, manufacturing_places, additives_en,
+                       nutrition_grade_fr, main_category_en, energy_100g, 
+                       fat_100g, saturated_fat_100g, carbohydrates_100g, 
+                       sugars_100g, proteins_100g, salt_100g, 
+                       nutrition_score_fr_100g, nutrition_score_uk_100g)
 glimpse(food_germany)
 ```
 
-We managed to drill down the database to `r ncol(food_germany)` variables. There variables now contain less than 40% of NAs and can be used for further analysis.
-
-
-# Univariate Plots Section
-
-## Macronutritions
-I will begin to explore the **macronutritions** in the dataset. That is, **fat**, **proteins**, and **carbohydrates**. 
-
-```{r Histogram fat, echo=FALSE}
-histogram_helper(food_germany$fat_100g, "fat_100g", bwidth = 2)
+```{r Colnumber of important features, echo=FALSE}
+brands_col <- 3
+pnns_1_col <- 7
+pnns_2_col <- 8
+fat_col <- 14
+saturated_fat_col <- 15
+carbohydrates_col <- 16
+proteins_col <- 18
+nutrition_score_fr_col <- 20
+nutrition_score_uk_col <- 21
 ```
 
-Most products do not contain a lot of **fat**. The distribution is **skewed left**. Very few products contain a lot of fat. 
+We managed to drill down the database to `r ncol(food_germany)` variables. These features now contain less than 40% of NAs and can be used for further analysis.
 
-For the purpose of a healthy diet is is crucial to investigate **saturated fat** as it has been linked to cardiovascular diseases.
-
-```{r Histogram saturated fat, echo=FALSE}
-histogram_helper(food_germany$saturated_fat_100g, "saturated_fat_100g", bwidth = 2)
-```
-
-It seems that most products do not contain a lot of **saturated fat**. Indeed there is tiny peak of products that contain around 50g of saturated fat per 100g.
-
-```{r Histogram proteins, echo=FALSE}
-histogram_helper(food_germany$proteins_100g, "protein_100g", bwidth = 2)
-```
-
-The distribution of **protein** is more **skewed to the left** than the distribution of fat. There are few products with a lot of protein. I suppose these are **food supplements** for weight loss or muscle training. 
-
-```{r Histogram carbohydrates, echo=FALSE}
-histogram_helper(food_germany$carbohydrates_100g, "carbohydrates_100g", bwidth = 2)
-```
-
-The distribution of **carbohydrates** is more evenly distributed than the distribution of fat or proteins. Most products do not contain a lot of carbohydrates. The distribution is slightly **bimodal**, indicating two different sort of products. 
-
-## Nutritional Value
-The database has two variables that give information about the nutritional value of the products. There is a score from France (**nutrition_score_fr_100g**) and a score from the UK (**nutrition_score_uk_100g**). Let us see how they differ.
-
-```{r Histogram nutrional scores, echo=FALSE}
-nutrition_score_dataframe <- food_germany %>%
-  melt(measure.vars = 19:20)
-  
-ggplot(nutrition_score_dataframe, aes(x = value)) +
-  geom_histogram(binwidth = 2, fill = color_fill, colour = color_border) +
-    labs(x = "Nutrional Value") +
-    facet_wrap(~ variable)
-
-ggplot(nutrition_score_dataframe, aes(x = value, fill = variable)) +
-  geom_histogram(binwidth = 1, position="identity", alpha = 0.2) +
-    labs(x = "Nutrional Value")
-```
-
-Obviously the variables are not drastically different from another. For further analysis I will stick to the **French** system.
-
-From a first glimpse at the nutritional value, the distribution looks a little bit **bimodal**. There is a high peak at around a score of 0. These might be water products that are neither nutritional valuable nor non-valuable. Another peak seems to be around a score of 15. 
-
-Let us dive deeper into the nutritional value of different food categories. The **pnns_groups_1** variable contains information of the product types.
-
-```{r Tidy pnss variable, echo=FALSE}
+```{r Tidy pnss features, echo=FALSE}
 # Borrowed idea from jlaurent:
 # https://www.kaggle.com/jelaurent/d/openfoodfacts/world-food-facts/openfoodfacts-exploring-the-dataset/notebook
+
+# Capitalize first letter of feature
 food_germany$pnns_groups_1 <- gsub("^([a-z])(\\w+)", "\\U\\1\\L\\2", food_germany$pnns_groups_1, perl = TRUE)
+food_germany$pnns_groups_2 <- gsub("^([a-z])(\\w+)", "\\U\\1\\L\\2", food_germany$pnns_groups_2, perl = TRUE)
+
+# Replace 'unkown' with empty string
+food_germany$pnns_groups_1 <- gsub("unknown", "", food_germany$pnns_groups_1)
+
+# Replace dash with space
 food_germany$pnns_groups_1 <- as.factor(gsub("-", " ", food_germany$pnns_groups_1))
 
 # Lowercase variables
@@ -196,9 +151,94 @@ food_germany$pnns_groups_1 <- gsub(pattern = '([[:upper:]])', perl = TRUE, repla
 food_germany$pnns_groups_2 <- gsub(pattern = '([[:upper:]])', perl = TRUE, replacement = '\\L\\1', food_germany$pnns_groups_2)
 ```
 
+# Univariate Plots Section
+
+## Macronutritions
+I will begin to explore the **macronutritions**: That is, **fat**, **proteins**, and **carbohydrates**. 
+
+```{r Histogram fat, echo=FALSE}
+histogram_helper(food_germany$fat_100g, "fat_100g", bwidth = 2)
+```
+
+Most products do not contain a lot of **fat**. The distribution is **skewed left**.
+
+For the purpose of a healthy diet is is crucial to investigate **saturated fat** as it has been linked to *cardiovascular diseases*.
+
+```{r Histogram saturated fat, echo=FALSE}
+histogram_helper(food_germany$saturated_fat_100g, "saturated_fat_100g", bwidth = 2)
+```
+
+Most products do not contain a lot of **saturated fat**. The distribution is sort of bimodal. There is tiny peak of products that contain around 50g of saturated fat per 100g.
+
+```{r Products with ~ 50g of saturated fat per 100g, echo=FALSE}
+filter(food_germany, saturated_fat_100g > 49, saturated_fat_100g < 60)$product_name
+```
+
+These are **butter** products. In terms of a healthy diet one shouldn't eat too much butter.
+
+```{r Histogram proteins, echo=FALSE}
+histogram_helper(food_germany$proteins_100g, "proteins_100g", bwidth = 2)
+```
+
+The distribution of **protein** is **skewed to the left**. There are few products with a lot of protein. These are **food supplements** for weight loss or muscle training. 
+
+```{r Products high in protein, echo=FALSE}
+filter(food_germany, proteins_100g > 75)$product_name
+```
+
+```{r Histogram carbohydrates, echo=FALSE}
+histogram_helper(food_germany$carbohydrates_100g, "carbohydrates_100g", bwidth = 2)
+```
+
+The distribution of **carbohydrates** is also **skewed left**. Most products do not contain a lot of carbohydrates. The distribution is slightly **bimodal**.
+
+```{r Histogram sugar, echo=FALSE}
+histogram_helper(food_germany$sugars_100g, "sugars_100g", bwidth = 2)
+```
+
+The distribution of sugar is sort of similar. It is also **skewed left** and **bimodal**. 
+
+## Nutritional Value
+
+### Nutritional score
+The database has two features with information about the product's nutritional value. There is a score from France (**nutrition_score_fr_100g**) and a score from the UK (**nutrition_score_uk_100g**). Let us see how they differ.
+
+```{r Histogram nutritional scores, echo=FALSE}
+# Melt data frame for nutritional score features
+nutrition_score_dataframe <- food_germany %>%
+  melt(measure.vars = nutrition_score_fr_col:nutrition_score_uk_col)
+
+## Histograms of nutritional score features
+ggplot(nutrition_score_dataframe, aes(x = value)) +
+  geom_histogram(binwidth = 2, fill = COLOR_FILL, colour = COLOR_BORDER) +
+    labs(x = "Nutrional Value") +
+    facet_wrap(~ variable)
+
+# Density plot 
+ggplot(nutrition_score_dataframe, aes(x = value, fill = variable)) +
+  geom_density(alpha = .3) +
+  labs(x = "Nutritional Value")
+```
+
+Obviously the variables are not drastically different from another. The British system seems to be more conservative (the lower the value the healthier). For further analysis I will stick to the **French** system. 
+
+From a first glimpse at the nutritional value, the distribution looks a little bit **bimodal**. There is a high peak at around a score of 0. These might be water products that are neither nutritional valuable nor non-valuable. Another peak seems to be around a score of 15. 
+
+## Nutritional grade
+
+Apart from the nutritional score there is a feature about the nutrional grade of the products (**nutrition_grade_fr**). The grade system is very similar to the grade system in schools. **a** is supposed to be a healthy product, whereas **e** is an unhealthy product.
+
+```{r Nutritional grade of products, echo=FALSE}
+# Barchart of nutritional grades
+ggplot(food_germany, aes(x = nutrition_grade_fr)) +
+  geom_bar(fill = COLOR_FILL)
+```
+
+Many products do not have a grade. The graded products have a sort of uniform distribution. 
+
 ## Other variables
 
-```{r Convert energy to kcal, echo=FALSE}
+```{r Histogram of kcal, echo=FALSE}
 food_germany$kcal_100g <- food_germany$energy_100g * 0.239006
 histogram_helper(food_germany$kcal_100g, "kcal_100g", bwidth = 10)
 ```
@@ -207,13 +247,19 @@ Energy in food is most often measured in **kilojoule**. Customers are usually mo
 
 The distribution has three peaks and is skewed left. The mean is `r mean(food_germany$kcal_100g, na.rm = TRUE)`. 
 
+```{r Products high in kcal, echo=FALSE}
+filter(food_germany, kcal_100g > 700)$product_name
+```
+
+Olive oil, sunflower oil and butter are very high in kcals. 
+
 ```{r Histogram salt, echo=FALSE}
 histogram_helper(food_germany$salt_100g, "salt_100g", bwidth = 1)
 ```
 
 There is not much **salt** in most products. Just very few have a lot of salt. I reckon these are salt products :) 
 
-It would be also interesting to find out which brands produce most products.
+It would be also interesting to find out which brands produce most products?
 
 ```{r Barchart common brands, echo=FALSE}
 common_brands_vector <- sort(table(food_germany$brands), decreasing = TRUE)[2:30]
@@ -222,30 +268,25 @@ common_brands_df <- data.frame(brands = common_brands_names, frequency = common_
 common_brands_df <- transform(common_brands_df, brands = reorder(brands, -frequency))
 
 ggplot(common_brands_df, aes(x = brands, y = frequency)) + 
-  geom_bar(stat = "identity", fill = color_fill, color = color_border) +
+  geom_bar(stat = "identity", fill = COLOR_FILL, color = COLOR_BORDER) +
    theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
-Most products sold in Germany are made by **Gut & Günstig**. **Alnature** comes in second place. 
+Most products sold in Germany are made by **Gut & Günstig**. **Alnatura** comes in second place. 
 
-```{r Nutrition grade, echo=FALSE}
-ggplot(food_germany, aes(x = nutrition_grade_fr)) +
-  geom_bar(fill = color_fill)
+```{r Most common groups, echo=FALSE}
+ggplot(food_germany, aes(pnns_groups_1)) +
+  geom_bar(fill = COLOR_FILL)
 ```
 
-Many products do not have a nutrition grade. The ones that have a nutrition grade show a uniform distribution. 
+Most products are **dairy products**. **Beverages** and **sugary snacks** come in second place. Almost half of the products do not a group assigned. 
+
 
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset. 
-
-```{r NAs in variable, echo=FALSE}
-apply(food_germany, 2, function(x) sum(is.na(x)) / length(x))
-```
-
-Many features do not contain any missing values. Most features that contain nutritional values contain missing values at around 30%. 
+There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset.
 
 ```{r Glimpse at dataset, echo=FALSE}
 glimpse(food_germany)
@@ -256,22 +297,24 @@ The dataset contains factors and numerics. The factor's level differ heavily. Th
 
 ### What is/are the main feature(s) of interest in your dataset?
 
-The main features of the dataset are features that contain information that is relevant for a healthy diet. These are all **macronutritions**, **nutritional_score_fr_100g**, and **kcal_100g**.
+The main features of the dataset are features that contain information that is relevant for a healthy diet. These are all **macronutritions**, **nutritional_score_fr_100g**, **nutritional_grade_fr** and **kcal_100g**.
 
 ### What other features in the dataset do you think will help support your investigation into your feature(s) of interest?
-It would be very interesting to search for patterns that depend on the **brands** and the product groups (**pnns_group_1**). There might be brands that produce products that tend to be unhealty or healthy. It would be also interesting to find out what makes some products healthier than others. We already saw that **cereals** and **fruit and vegetables** are nutritionally valuable. But why? We might investigate their **macronutrition distribution**.
+
+For further investigation I will look into the **pnns_groups_1**, **pnns_groups_2**, and **brands** features. It will be interesting to find out if some types of products are better of worse for a healthy diet. It might also be interesting to check whether some brands are healthier than others.
 
 ### Did you create any new variables from existing variables in the dataset?
 I created a new variable **kcal_100g**. I am more accustomed to kcal than kilojoule as an indicator of energy. In order to find the most common **brands** I created the dataframe **common_brands_df**. 
 
-
 ### Of the features you investigated, were there any unusual distributions? Did you perform any operations on the data to tidy, adjust, or change the form of the data? If so, why did you do this?
-The dataset initially had too many features. I reduced the dataset mainly to features that contain less than 40% of missing values. I also only selected products from Germany as these are of special interest for my analysis. 
-I changed the variable **pnns_groups_1** with some regex to make it more readable and in order to catch spelling mistakes. 
 
+The **pnns_groups_1** variable had to be tidied. In order to avoid duplicates, I set all entries to lowercase and replaced a dash with a blank space. I also capitalized the first letter of the feature. I filtered the whole data set for german entries. Being from Germany these are the products that interest me. 
+
+Most distributions of **macronutritions** are skewed left. This is not an unusual pattern though as they add up to about 100g. What striked me was that there is group of products that are very high in protein. These are bodybuilding products. No other products contain so much protein per 100g. What also struck me was the high amount of saturated fat in butter. Butter seems to be especially unhealthy as it also contains a lot of kcals. Olive and sunflower oil are also very high in kcals. 
+
+
+<!----------------------------- Bivarate Analysis ------------------------------------------------- -->
 # Bivariate Plots Section
-
-
 ```{r Scatterplot matrix, echo=FALSE}
 pairs(~ proteins_100g +
         fat_100g+carbohydrates_100g +
@@ -282,7 +325,7 @@ pairs(~ proteins_100g +
 ```
 
 ```{r Correlation table, echo=FALSE}
-round(cor(food_germany[, c(12:21)], use = "complete.obs"), 2)
+round(cor(food_germany[, c(13:22)], use = "complete.obs"), 2)
 ```
 
 **Energie** and **fat** are highly correlated (r = .81). This makes sense as one gram of fat contains 9 kcal and therefore more energy than carbohydrates and protein. **Sugar* and **saturated fat** is not correlated (r = .04). This indicates that there are no sugary products that contain a lot of saturated fat. 
@@ -374,7 +417,7 @@ Most products that contain **fat** do not contain a high amount of **saturated f
 
 
 
-
+<!----------------------------- Multivariate Analysis ------------------------------------------------- -->
 # Multivariate Plots Section
 
 
@@ -443,7 +486,7 @@ beverages$alcohol <- as.factor(alcohol)
 
 # Plot beverages
 ggplot(beverages, aes(x = nutrition_score_fr_100g)) +
-  geom_density(fill = color_fill) +
+  geom_density(fill = COLOR_FILL) +
   facet_grid(~ alcohol)
 ```
 
@@ -454,7 +497,7 @@ common_types <- filter(food_germany, pnns_groups_1 %in% pnns_groups_1[! pnns_gro
 
 # Plot most common
 ggplot(common_types, aes(x = nutrition_score_fr_100g)) +
-  geom_histogram(binwidth = 2, fill = color_fill, colour = color_border) +
+  geom_histogram(binwidth = 2, fill = COLOR_FILL, colour = COLOR_BORDER) +
     labs(x = "Nutrional Value") +
     facet_wrap(~ pnns_groups_1)
 ```
