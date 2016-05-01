@@ -75,7 +75,7 @@ density_plot <- function(xvariable, fill, xl) {
   # Returns:
   #  Density plots
   
-  ggplot(food_germany, aes(x = xvariable, fill = fill)) +
+  ggplot(food_common, aes(x = xvariable, fill = fill)) +
     geom_density(alpha = 0.4) +
     xlab(xl) +
     ylab("density")
@@ -320,7 +320,8 @@ pairs(~ proteins_100g +
         fat_100g+carbohydrates_100g +
         saturated_fat_100g +
         nutrition_score_fr_100g +
-        sugars_100g, data = food_germany,
+        sugars_100g, 
+      col = COLOR_FILL, pch = 1, cex = 0.2, data = food_germany,
       main="Simple Scatterplot Matrix")
 ```
 
@@ -399,7 +400,7 @@ Again, this is our **coconut oil** and **coconut fat**.
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
-Nutritional data all fall within a diagnoal of a scatterplot. As the macronutritions features all add up to maximal 100g the features can not add up above 100g. 
+Nutritional data all fall within a diagonal of a scatterplot. As the macronutritions features all add up to maximal 100g the features can not add up above 100g. 
 
 Linear relationsships do not occur. Almost all relationships are positive. Most of these relationships are small. 
 
@@ -411,54 +412,59 @@ Most products that contain **fat** do not contain a high amount of **saturated f
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
-
+No.
 
 ### What was the strongest relationship you found?
 
+One of the strongest relationship was between **fat** and **saturated fat** (r = . 81). The nutritional score features correlate strongly with another (r = .97). 
 
 
 <!----------------------------- Multivariate Analysis ------------------------------------------------- -->
 # Multivariate Plots Section
-
-
-```{r Density plot carbohydrates food category, echo=FALSE}
-density_plot(food_germany$carbohydrates_100g, food_germany$pnns_groups_1, "carbohydrates_100g")
-```
-
-Suggary snacks seem to contain more carbohydrates. Let's have a look at sugars
-
-```{r Density plot sugars food category, echo=FALSE}
-density_plot(food_germany$sugars_100g, food_germany$pnns_groups_1, "sugars_100g")
-```
-
-```{r Density plot proteins food category, echo=FALSE}
-density_plot(food_germany$proteins_100g, food_germany$pnns_groups_1, "proteins_100g")
-```
-
-```{r Density plot fat food category, echo=FALSE}
-density_plot(food_germany$fat_100g, food_germany$pnns_groups_1, "fat_100g")
-```
-
-```{r Density plot proteins nutrition_grade_fr, echo=FALSE}
-density_plot(food_germany$proteins_100g, food_germany$nutrition_grade_fr, "proteins_100g")
-```
 
 ```{r Filter data frame for common brands, echo=FALSE}
 food_types <- filter(food_germany, pnns_groups_1 %in% pnns_groups_1[! pnns_groups_1 %in% c("unknown", "")])
 food_common <- filter(food_types, brands %in% common_brands_names[c(1:5)])
 ```
 
+```{r Density plot carbohydrates food category, echo=FALSE}
+density_plot(food_common$carbohydrates_100g, food_common$pnns_groups_1, "carbohydrates_100g")
+```
+
+Sugary snacks are heavy in carbohydrates. Beverages usually contain about 15 gram of carbohydrates.
+
+```{r Density plot sugars food category, echo=FALSE}
+density_plot(food_common$sugars_100g, food_common$pnns_groups_1, "sugars_100g")
+```
+
+The distribution for sugar is sort of similar. Beverages contain a specific amount of sugar. Salty snacks and sugary snacks contain most sugar. 
+
+```{r Density plot proteins food category, echo=FALSE}
+density_plot(food_common$proteins_100g, food_common$pnns_groups_1, "proteins_100g")
+```
+
+Milk and dairy products contain most protein. Fruits and vegetables are usually low in protein and also contain a specific amount.
+
+```{r Density plot proteins nutrition_grade_fr, echo=FALSE}
+density_plot(food_common$proteins_100g, food_common$nutrition_grade_fr, "proteins_100g")
+```
+
+Plotting the distribution of graded products no specific pattern emerges. The amount of protein does not determine wheater a product is considered healthy or not healthy. 
+
 ```{r Kilocalories of different food groups, echo=FALSE}
 ggplot(food_types, aes(x = kcal_100g, fill = pnns_groups_1)) +
   geom_density(alpha = .5)
 ```
 
+**Fat and sauces** are very heavy in kcals. Fish, meat, and eggs usually do not contain a lot kcals. 
 
 ```{r Nutritional score of most common brands, echo=FALSE}
 ggplot(food_common, aes(x = nutrition_score_fr_100g, fill = brands)) +
     geom_density(alpha = 0.4) +
     labs(x = "nutrition_score_fr_100g")
 ```
+
+Milkbona seems to be the most healthy brand. This is a biased representation because Milkbona sells milk products that usually are considered more healthy. Except **Edeka** every brand has a bimodal distribution. Many products can be considered healthy whereas the other half can be considered unhealthy. 
 
 ```{r Nutritional Score of beverages, echo=FALSE}
 # Get rows containing beverages
@@ -490,6 +496,12 @@ ggplot(beverages, aes(x = nutrition_score_fr_100g)) +
   facet_grid(~ alcohol)
 ```
 
+It turned out that alcoholic products do not contain data about the nutritional score. Non-alcoholic beverages show a bimodal distribution. Most drinks are low in nutritional score. Some products are considered unhealthy. Most of these products are lemonades: 
+
+```{r Unhealthy drinks, echo=FALSE}
+(filter(beverages, nutrition_score_fr_100g > 10)$product_name)
+```
+
 
 ```{r Nutrional score of product types, echo=FALSE}
 # Filter products types for meaningful types
@@ -504,13 +516,26 @@ ggplot(common_types, aes(x = nutrition_score_fr_100g)) +
 
 **Sugary** snacks obviously are not very healthy. Appart from sugary snacks there is no product type that is of bad nutritional value per se. **Cereals and potatoes** seem to be beneficial for health. The same goes for **Fruits and vegetables**. **Milk and dairy products** have a bimodal distribution. This indicates that half of these products are not very healthy. **Beverages** by and large seem to be reasonably good. The peak of the distribution might be because of **water products**. 
 
+```{r Boxplots of food types, echo=FALSE}
+ggplot(common_types, aes(x = pnns_groups_1, nutrition_score_fr_100g)) +
+  geom_boxplot(fill = COLOR_FILL) +
+  facet_wrap(~ nutrition_grade_fr) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+This plot shows the relationship between the nutritional grade and score variable. They correlate positively. Out of the food types that get a grade **a** fruits and vegetables are the most healthy.
+
 
 
 # Multivariate Analysis
 
 ### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 
+The data strengthened the common fact that **sugary snacks** and **salty snacks** are considered unhealthy. They not only contain a lot of kcals, they are also very high in carbohydrates (especially sugars). 
+
 ### Were there any interesting or surprising interactions between features?
+
+What I found interesting is that beverages usually have a specific amount of carbohydrates and sugars. Usually they contain between 5 and 30 grams of carbohydrates. A lot of patterns weren't quite surprising. **Sugary snacks** are high in sugar and considered unhealthy. What surprised me is that beverages do not contain a lot of kcals. 
 
 ### OPTIONAL: Did you create any models with your dataset? Discuss the strengths and limitations of your model.
 
@@ -519,8 +544,11 @@ ggplot(common_types, aes(x = nutrition_score_fr_100g)) +
 # Final Plots and Summary
 
 ### Plot One
-```{r echo=FALSE, Plot_One}
-
+```{r , echo=FALSE}
+ggplot(common_types, aes(x = pnns_groups_1, nutrition_score_fr_100g)) +
+  geom_boxplot(fill = COLOR_FILL) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(title = "Boxplot")
 ```
 
 ### Description One
