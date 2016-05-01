@@ -4,25 +4,36 @@ output:
     theme: flatly
     toc: no
 ---
-World Food Facts
+World Food Facts (Germany)
 ========================================================
 
 
-The **World Food Facts** dataset is a french initiative. It tries to collect food products from all over the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturers can freely add products.
+The **World Food Facts** dataset is a french initiative. It collects food products from around the world. The dataset is provided by **Open Food Facts** under an Open Database License (http://opendatacommons.org/licenses/odbl/1.0/). Customers and food manufacturers can freely contribute to the database.
 
-In this Exploratory Data Analysis I will try to get some insights into the food products of Germany. Being from Germany I am interested in the nutritional value of the products found in the German supermarket.
+In this Exploratory Data Analysis I will try to get some insights into the food products of **Germany**. Being from Germany I am interested in the nutritional value of the products I can find in German supermarkets.
 
-
-```{r Libraries, echo=FALSE, message=FALSE, warning=FALSE}
+```{r Load libraries, echo=FALSE, message=FALSE, warning=FALSE}
 library(ggplot2)
 library(dplyr)
 library(reshape2)
+library(psych)
 ```
 
 ```{r Constants, echo=FALSE}
 COLOR_FILL<- "#CD6771"
 COLOR_TWO <- "#0D5047"
 COLOR_BORDER <- "#F6A4AC"
+
+# Constants for feature columns
+BRANDS_COL <- 3
+PNNS_1_COL <- 7
+PNNS_2_COL <- 8
+FAT_COL <- 14
+SATURATED_FAT_COL <- 15
+CARBOHYDRATES_COL <- 16
+PROTEINS_COL <- 18
+NUTRITION_SCORE_FR_COL <- 20
+NUTRITION_SCORE_UK_COL <- 21
 ```
 
 ```{r Helper functions, echo=FALSE}
@@ -99,7 +110,7 @@ food_data_germany <- filter(food_data, countries_en == "Germany")
 
 
 # Data Cleaning
-There are in total `r nrow(food_data)` food products in the dataset. Each food product has `r ncol(food_data)` variables. Not every variable will be of interest for this analysis. I will focus my analysis on products from **products from Germany**. When I filter the database for German products the entire database is reduced `r nrow(food_data_germany)` products. In order to select variables that contain meaningful information we have to filter the dataset for NAs. Variables with a lot of **NAs** should not be included in the analysis. For this analysis I will remove features with more than 40% of NAs.
+There are in total `r nrow(food_data)` food products in the dataset. Each food product has `r ncol(food_data)` variables. Not every variable will be of interest for this analysis. I will focus my analysis on **products from Germany**. When I filter the dataset for German products the entire dataset is reduced `r nrow(food_data_germany)` products. In order to select variables that contain meaningful information I checked the dataset for NAs. Variables with a lot of **NAs** should not be included in the analysis. For this analysis I will remove features with more than 40% of NAs.
 
 ```{r NAs, echo=FALSE, warning=FALSE}
 # Code taken and accustomed from
@@ -113,7 +124,7 @@ There are in total `r nrow(food_data)` food products in the dataset. Each food p
   as.data.frame)
 ```
 
-Most features do contain a lot of missing values. Out of `r ncol(food_data_germany)`, `r nrow(na_variables)` meet the NA criteria (less than 40%). Not all of these features are of interest.
+Most features do contain a lot of missing values. Out of `r ncol(food_data_germany)` features, `r nrow(na_variables)` features meet the NA criteria (less than 40%). Not all of these features are of interest for this analysis. I will therefore select only relevant features.
 
 ```{r Filter data frame, echo=FALSE, warning=FALSE, cache=TRUE}
 food_germany <- select(food_data_germany, product_name, generic_name,
@@ -124,18 +135,6 @@ food_germany <- select(food_data_germany, product_name, generic_name,
                        sugars_100g, proteins_100g, salt_100g, 
                        nutrition_score_fr_100g, nutrition_score_uk_100g)
 glimpse(food_germany)
-```
-
-```{r Colnumber of important features, echo=FALSE}
-brands_col <- 3
-pnns_1_col <- 7
-pnns_2_col <- 8
-fat_col <- 14
-saturated_fat_col <- 15
-carbohydrates_col <- 16
-proteins_col <- 18
-nutrition_score_fr_col <- 20
-nutrition_score_uk_col <- 21
 ```
 
 We managed to drill down the database to `r ncol(food_germany)` variables. These features now contain less than 40% of NAs and can be used for further analysis.
@@ -214,7 +213,7 @@ The database has two features with information about the product's nutritional v
 ```{r Histogram nutritional scores, echo=FALSE}
 # Melt data frame for nutritional score features
 nutrition_score_dataframe <- food_germany %>%
-  melt(measure.vars = nutrition_score_fr_col:nutrition_score_uk_col)
+  melt(measure.vars = NUTRITION_SCORE_FR_COL:NUTRITION_SCORE_UK_COL)
 
 ## Histograms of nutritional score features
 ggplot(nutrition_score_dataframe, aes(x = value)) +
@@ -228,7 +227,7 @@ ggplot(nutrition_score_dataframe, aes(x = value, fill = variable)) +
   labs(x = "Nutritional Value")
 ```
 
-Obviously the variables are not drastically different from another. The British system seems to be more conservative (the lower the value the healthier). For further analysis I will stick to the **French** system. 
+Obviously the variables are not drastically different from another. The British system seems to be more conservative (overall the products are rated less healthy). For further analysis I will stick to the **French** system. 
 
 From a first glimpse at the nutritional value, the distribution looks a little bit **bimodal**. There is a high peak at around a score of 0. These might be water products that are neither nutritional valuable nor non-valuable. Another peak seems to be around a score of 15. 
 
@@ -251,9 +250,9 @@ food_germany$kcal_100g <- food_germany$energy_100g * 0.239006
 histogram_helper(food_germany$kcal_100g, "kcal_100g", bwidth = 10)
 ```
 
-Energy in food is most often measured in **kilojoule**. Customers are usually more accustomed to **kilocalories**. Therefore I created a new variable **kcal_100g** that used the conversion of the following website: http://www.rapidtables.com/convert/energy/kj-to-kcal.htm. 
+Energy in food is most often measured in **kilojoule**. Customers are usually more accustomed to **kilocalories**. Therefore I created a new variable **kcal_100g** that used the usual [conversion](http://www.rapidtables.com/convert/energy/kj-to-kcal.htm). 
 
-The distribution has three peaks and is skewed left. The mean is `r mean(food_germany$kcal_100g, na.rm = TRUE)`. 
+The distribution has three peaks and is skewed left. The mean is `r round(mean(food_germany$kcal_100g, na.rm = TRUE), 2)`. 
 
 ```{r Products high in kcal, echo=FALSE}
 filter(food_germany, kcal_100g > 700)$product_name
@@ -278,14 +277,14 @@ common_brands_df <- transform(common_brands_df, brands = reorder(brands, -freque
 ggplot(common_brands_df, aes(x = brands, y = frequency)) + 
   geom_bar(stat = "identity", fill = COLOR_FILL, color = COLOR_BORDER) +
    theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
 ```
 
 Most products sold in Germany are made by **Gut & Günstig**. **Alnatura** comes in second place. 
 
 ```{r Most common groups, echo=FALSE}
 ggplot(food_germany, aes(pnns_groups_1)) +
-  geom_bar(fill = COLOR_FILL)
+  geom_bar(fill = COLOR_FILL) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 Most products are **dairy products**. **Beverages** and **sugary snacks** come in second place. Almost half of the products do not a group assigned. 
@@ -297,6 +296,7 @@ Most products are **dairy products**. **Beverages** and **sugary snacks** come i
 There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset.
 
 ```{r Glimpse at dataset, echo=FALSE}
+describe(food_germany)
 glimpse(food_germany)
 ```
 
@@ -318,7 +318,8 @@ I created a new variable **kcal_100g**. I am more accustomed to kcal than kilojo
 
 The **pnns_groups_1** variable had to be tidied. In order to avoid duplicates, I set all entries to lowercase and replaced a dash with a blank space. I also capitalized the first letter of the feature. I filtered the whole data set for german entries. Being from Germany these are the products that interest me. 
 
-Most distributions of **macronutritions** are skewed left. This is not an unusual pattern though as they add up to about 100g. What striked me was that there is group of products that are very high in protein. These are bodybuilding products. No other products contain so much protein per 100g. What also struck me was the high amount of saturated fat in butter. Butter seems to be especially unhealthy as it also contains a lot of kcals. Olive and sunflower oil are also very high in kcals. 
+### Conclusion
+Most distributions of **macronutritions** are skewed left. This is not an unusual pattern though as they add up to about 100g. What striked me was that there is group of products that are very high in protein. These are bodybuilding products. No other products contain so much protein per 100g. What also struck me was the high amount of saturated fat in butter. Butter seems to be especially unhealthy as it also contains a lot of kcals. Olive and sunflower oil are also very high in kcals.
 
 
 <!----------------------------- Bivarate Analysis ------------------------------------------------- -->
@@ -330,7 +331,7 @@ pairs(~ proteins_100g +
         nutrition_score_fr_100g +
         sugars_100g, 
       col = COLOR_FILL, pch = 1, cex = 0.2, data = food_germany,
-      main="Simple Scatterplot Matrix")
+      main="Scatterplot Matrix")
 ```
 
 ```{r Correlation table, echo=FALSE}
@@ -346,7 +347,7 @@ scatterplot_ingredients(food_germany$fat_100g, food_germany$proteins_100g,
                         "fat_100g", "proteins_100g")
 ```
 
-When we plot **fat** and **protein** two interesting patterns emerge: (1) **Bodybuilding products** are high in protein but very low in fat. (2) Olive oils are on the other extreme. They are very high in fat but low in protein.
+Two interesting patterns emerge: (1) **Bodybuilding products** are high in protein but very low in fat. (2) Olive oils are on the other extreme. They are very high in fat but low in protein.
 
 ```{r high protein low fat products, echo=FALSE}
 (high_protein_low_fat <- filter(food_germany, proteins_100g > 75, fat_100g < 20)$product_name)
@@ -356,7 +357,7 @@ When we plot **fat** and **protein** two interesting patterns emerge: (1) **Body
 (high_fat_low_protein <- filter(food_germany, proteins_100g < 5, fat_100g > 90)$product_name)
 ```
 
-Let us have a look at **fat** and **carbohydrates**.
+Let us have a look at the other macronutritions **fat** and **carbohydrates**.
 
 ```{r Scatterplot fat and carbohydrates, echo=FALSE}
 scatterplot_ingredients(food_germany$fat_100g, food_germany$carbohydrates_100g,
@@ -373,7 +374,6 @@ scatterplot_ingredients(food_germany$carbohydrates_100g, food_germany$proteins_1
 ```
 
 Again we can find the same pattern. The **bodybuilding products** are very high in protein but low in carbohydrates. Apart from that there is nothing particularly special about the dataset. 
-
 ```{r Scatterplot nutrional value and fat, echo=FALSE}
 scatterplot_ingredients(food_germany$nutrition_score_fr_100g, 
                         food_germany$saturated_fat_100g,
@@ -408,15 +408,7 @@ Again, this is our **coconut oil** and **coconut fat**.
 
 ### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
-Nutritional data all fall within a diagonal of a scatterplot. As the macronutritions features all add up to maximal 100g the features can not add up above 100g. 
-
-Linear relationsships do not occur. Almost all relationships are positive. Most of these relationships are small. 
-
-When I plotted fat and carbohydrates with protein some products cluster around a high protein level with a low level of the other two macronutritions. These are bodybuilding products as muscles need protein to grow. 
-
-**Products high in saturated fat** usually have a low nutrition score. This is in line with the usually recommendation to avoid saturated fats. 
-
-Most products that contain **fat** do not contain a high amount of **saturated fat**. Coconut oil is one exception. It even as a high nutrition score as is evident in the scatterplot of saturated fat and nutrition score. 
+Nutritional data all fall within a diagonal of a scatterplot. As the macronutritions features all add up to maximal 100g the features can not add up above 100g. Linear relationsships do not occur. (1) Almost all relationships are positive. Most of these relationships are small. When I plotted fat and carbohydrates with protein some products cluster around a high protein level with a low level of the other two macronutritions. These are **bodybuilding products** as muscles need protein to grow. It is obvious that these products are distinct from other products. They are especially designed to contain a lot of protein but not much fat or carbohydrates. (2) **Products high in saturated fat** usually have a low nutrition score. This is in line with the usually recommendation to avoid saturated fats. (3) Most products that contain **fat** do not contain a high amount of **saturated fat**. Coconut oil is one exception. It even as a high nutrition score as is evident in the scatterplot of saturated fat and nutrition score. 
 
 ### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 
@@ -424,7 +416,7 @@ No.
 
 ### What was the strongest relationship you found?
 
-One of the strongest relationship was between **fat** and **saturated fat** (r = . 81). The nutritional score features correlate strongly with another (r = .97). 
+One of the strongest relationship was between **fat** and **saturated fat** (r = . 81). The nutritional score features correlate strongly with another (r = .97).
 
 
 <!----------------------------- Multivariate Analysis ------------------------------------------------- -->
