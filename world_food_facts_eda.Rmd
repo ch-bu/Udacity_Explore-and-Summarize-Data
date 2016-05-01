@@ -4,7 +4,7 @@ output:
     theme: flatly
     toc: no
 ---
-World Food Facts by Christian Burkhart
+World Food Facts
 ========================================================
 
 
@@ -83,9 +83,17 @@ density_plot <- function(xvariable, fill, xl) {
 ```
 
 
-```{r Load data, echo=FALSE, cache=TRUE}
+```{r Load data, echo=FALSE, warnings=FALSE, cache=TRUE}
 setwd("~/Repositories/Udacity_Explore-and-Summarize-Data")
-food_data <- read.csv(file.path("data", "FoodFacts.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
+food_data1 <- read.csv(file.path("data", "FoodFacts1.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
+food_data2 <- read.csv(file.path("data", "FoodFacts2.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
+food_data3 <- read.csv(file.path("data", "FoodFacts3.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
+food_data4 <- read.csv(file.path("data", "FoodFacts4.csv"), header = TRUE, sep = ",", stringsAsFactors = TRUE)
+
+food_data <- rbind(food_data1, food_data2)
+food_data <- rbind(food_data, food_data3)
+food_data <- rbind(food_data, food_data4)
+
 food_data_germany <- filter(food_data, countries_en == "Germany")
 ```
 
