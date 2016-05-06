@@ -1,8 +1,8 @@
 ---
-output: 
-  html_document: 
-    theme: flatly
-    toc: no
+author: Christian Burkhart
+output:
+  md_document:
+    variant: markdown_github
 ---
 World Food Facts (Germany)
 ========================================================
