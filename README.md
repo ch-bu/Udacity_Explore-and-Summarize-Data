@@ -1,7 +1,9 @@
 World Food Facts (Germany)
 ==========================
 
-The **World Food Facts** dataset is a french initiative. It collects food products from around the world. The dataset is provided by **Open Food Facts** under an Open Database License (<http://opendatacommons.org/licenses/odbl/1.0/>). Customers and food manufacturers can freely contribute to the database.
+This project is part of [Udacity's Nanodegree Data Analyst](https://www.udacity.com/course/data-analyst-nanodegree--nd002). In this project I am carrying out a exploratory data analysis. The project is descriptive and includes univariate, bivariate, and multivariate analyses. I chose a dataset about food products from Germany: The World Food Facts.
+
+The [World Food Facts](http://world.openfoodfacts.org/data) dataset is a french initiative. It collects food products from around the world. The dataset is provided by **Open Food Facts** under an [Open Database License](http://opendatacommons.org/licenses/odbl/1.0/) and can be analyzed via [Kaggle](https://www.kaggle.com/openfoodfacts/world-food-facts). Customers and food manufacturers can freely contribute to the dataset.
 
 In this Exploratory Data Analysis I will try to get some insights into the food products of **Germany**. Being from Germany I am interested in the nutritional value of the products I can find in German supermarkets.
 
@@ -113,17 +115,13 @@ Macronutritions
 
 I will begin to explore the **macronutritions**: That is, **fat**, **proteins**, and **carbohydrates**.
 
-    ## Warning: Removed 753 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20fat-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20fat-1.png)<!-- -->
 
 Most products do not contain a lot of **fat**. The distribution is **skewed left**.
 
 For the purpose of a healthy diet is is crucial to investigate **saturated fat** as it has been linked to *cardiovascular diseases*.
 
-    ## Warning: Removed 823 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20saturated%20fat-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20saturated%20fat-1.png)<!-- -->
 
 Most products do not contain a lot of **saturated fat**. The distribution is sort of bimodal. There is tiny peak of products that contain around 50g of saturated fat per 100g.
 
@@ -153,9 +151,7 @@ Most products do not contain a lot of **saturated fat**. The distribution is sor
 
 These are **butter** products. In terms of a healthy diet one shouldn't eat too much butter.
 
-    ## Warning: Removed 770 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20proteins-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20proteins-1.png)<!-- -->
 
 The distribution of **protein** is **skewed to the left**. There are few products with a lot of protein. These are **food supplements** for weight loss or muscle training.
 
@@ -175,15 +171,11 @@ The distribution of **protein** is **skewed to the left**. There are few product
     ## [14] 100% Whey Gold Standard Double Rich Chocolate Flavour   
     ## 46765 Levels:    알 통깨 짜왕 너구리 うどん 안성탕면 다진마늘 ... 黑瓶眼药水
 
-    ## Warning: Removed 752 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20carbohydrates-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20carbohydrates-1.png)<!-- -->
 
 The distribution of **carbohydrates** is also **skewed left**. Most products do not contain a lot of carbohydrates. The distribution is slightly **bimodal**.
 
-    ## Warning: Removed 806 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20sugar-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20sugar-1.png)<!-- -->
 
 The distribution of sugar is sort of similar. It is also **skewed left** and **bimodal**.
 
@@ -194,13 +186,7 @@ Nutritional Value
 
 The database has two features with information about the product's nutritional value. There is a score from France (**nutrition\_score\_fr\_100g**) and a score from the UK (**nutrition\_score\_uk\_100g**). Let us see how they differ.
 
-    ## Warning: Removed 1720 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20nutritional%20scores-1.png)<!-- -->
-
-    ## Warning: Removed 1720 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Histogram%20nutritional%20scores-2.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20nutritional%20scores-1.png)<!-- -->![](world_food_facts_eda_files/figure-markdown_github/Histogram%20nutritional%20scores-2.png)<!-- -->
 
 Obviously the variables are not drastically different from another. The British system seems to be more conservative (overall the products are rated less healthy). For further analysis I will stick to the **French** system.
 
@@ -211,20 +197,18 @@ Nutritional grade
 
 Apart from the nutritional score there is a feature about the nutrional grade of the products (**nutrition\_grade\_fr**). The grade system is very similar to the grade system in schools. **a** is supposed to be a healthy product, whereas **e** is an unhealthy product.
 
-![](README_files/figure-markdown_github/Nutritional%20grade%20of%20products-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Nutritional%20grade%20of%20products-1.png)<!-- -->
 
 Many products do not have a grade. The graded products have a sort of uniform distribution.
 
 Other variables
 ---------------
 
-    ## Warning: Removed 734 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20of%20kcal-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20of%20kcal-1.png)<!-- -->
 
 Energy in food is most often measured in **kilojoule**. Customers are usually more accustomed to **kilocalories**. Therefore I created a new variable **kcal\_100g** that used the usual [conversion](http://www.rapidtables.com/convert/energy/kj-to-kcal.htm).
 
-The distribution has three peaks and is skewed left. The mean is 246.24.
+The distribution has three peaks and is skewed left. The mean is 246.24. Some products are very high in kcals. Let us see which:
 
     ##  [1] Coconpure                                      
     ##  [2] Vita D'or                                      
@@ -277,21 +261,19 @@ The distribution has three peaks and is skewed left. The mean is 246.24.
     ## [49] GranFruttato                                   
     ## 46765 Levels:    알 통깨 짜왕 너구리 うどん 안성탕면 다진마늘 ... 黑瓶眼药水
 
-Olive oil, sunflower oil and butter are very high in kcals.
+Looking at the list above olive oil, sunflower oil and butter are very high in kcals. These products are on the right hand side in the histogram above.
 
-    ## Warning: Removed 827 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Histogram%20salt-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Histogram%20salt-1.png)<!-- -->
 
 There is not much **salt** in most products. Just very few have a lot of salt. I reckon these are salt products :)
 
 It would be also interesting to find out which brands produce most products?
 
-![](README_files/figure-markdown_github/Barchart%20common%20brands-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Barchart%20common%20brands-1.png)<!-- -->
 
 Most products sold in Germany are made by **Gut & Günstig**. **Alnatura** comes in second place.
 
-![](README_files/figure-markdown_github/Most%20common%20groups-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Most%20common%20groups-1.png)<!-- -->
 
 Most products are **dairy products**. **Beverages** and **sugary snacks** come in second place. Almost half of the products do not a group assigned.
 
@@ -300,19 +282,7 @@ Univariate Analysis
 
 ### What is the structure of your dataset?
 
-There are 2554 products with 22 features in the dataset.
-
-    ## Warning in FUN(newX[, i], ...): no non-missing arguments to min; returning
-    ## Inf
-
-    ## Warning in FUN(newX[, i], ...): no non-missing arguments to min; returning
-    ## Inf
-
-    ## Warning in FUN(newX[, i], ...): no non-missing arguments to max; returning
-    ## -Inf
-
-    ## Warning in FUN(newX[, i], ...): no non-missing arguments to max; returning
-    ## -Inf
+There are 2554 products with 22 features in the dataset. The dataset contains factors and numerics.
 
     ##                         vars    n     mean       sd   median  trimmed
     ## product_name*              1 2554 29577.08 15254.02 36122.50 31152.86
@@ -409,8 +379,6 @@ There are 2554 products with 22 features in the dataset.
     ## $ nutrition_score_uk_100g (dbl) 14, 6, NA, NA, NA, NA, NA, NA, NA, NA,...
     ## $ kcal_100g               (dbl) 325.04816, 140.05752, NA, NA, NA, NA, ...
 
-The dataset contains factors and numerics. The factor's level differ heavily. There are features with just 6 levels and features with over 20,000 levels.
-
 ### What is/are the main feature(s) of interest in your dataset?
 
 The main features of the dataset are features that contain information that is relevant for a healthy diet. These are all **macronutritions**, **nutritional\_score\_fr\_100g**, **nutritional\_grade\_fr** and **kcal\_100g**.
@@ -435,7 +403,7 @@ Most distributions of **macronutritions** are skewed left. This is not an unusua
 Bivariate Plots Section
 =======================
 
-![](README_files/figure-markdown_github/Scatterplot%20matrix-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20matrix-1.png)<!-- -->
 
     ##                         energy_100g fat_100g saturated_fat_100g
     ## energy_100g                    1.00     0.81               0.64
@@ -486,9 +454,7 @@ Bivariate Plots Section
 
 Looking at the scatterplots there is an interesting pattern. Some products seem to contain a lot of protein and a tiny amount of carbohydrates and fat.
 
-    ## Warning: Removed 773 rows containing missing values (geom_point).
-
-![](README_files/figure-markdown_github/Scatterplot%20fat%20and%20protein-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20fat%20and%20protein-1.png)<!-- -->
 
 Two interesting patterns emerge: (1) **Bodybuilding products** are high in protein but very low in fat. (2) Olive oils are on the other extreme. They are very high in fat but low in protein.
 
@@ -517,23 +483,15 @@ Two interesting patterns emerge: (1) **Bodybuilding products** are high in prote
 
 Let us have a look at the other macronutritions **fat** and **carbohydrates**.
 
-    ## Warning: Removed 767 rows containing missing values (geom_point).
-
-![](README_files/figure-markdown_github/Scatterplot%20fat%20and%20carbohydrates-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20fat%20and%20carbohydrates-1.png)<!-- -->
 
 There are no special food groups in this scatterplot. What is interesting is the **hole** inside the scatterplot. Very few products contain around 25% of both protein and fat.
 
 What about **carbohydrates** and **protein**?
 
-    ## Warning: Removed 773 rows containing missing values (geom_point).
+![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20carbohydrates%20and%20protein-1.png)<!-- -->
 
-![](README_files/figure-markdown_github/Scatterplot%20carbohydrates%20and%20protein-1.png)<!-- -->
-
-Again we can find the same pattern. The **bodybuilding products** are very high in protein but low in carbohydrates. Apart from that there is nothing particularly special about the dataset.
-
-    ## Warning: Removed 860 rows containing missing values (geom_point).
-
-![](README_files/figure-markdown_github/Scatterplot%20nutrional%20value%20and%20fat-1.png)<!-- -->
+Again we can find the same pattern. The **bodybuilding products** are very high in protein but low in carbohydrates. Apart from that there is nothing particularly special about the dataset. ![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20nutrional%20value%20and%20fat-1.png)<!-- -->
 
 **Saturated fact** is often associates with an unhealthy diet. **Coconut oil** and **coconut fat** are both high in saturated fat and nutritional score.
 
@@ -542,9 +500,7 @@ Again we can find the same pattern. The **bodybuilding products** are very high 
 
 What about **saturated fat** and **fat**?
 
-    ## Warning: Removed 824 rows containing missing values (geom_point).
-
-![](README_files/figure-markdown_github/Scatterplot%20saturated%20fat%20and%20fat-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Scatterplot%20saturated%20fat%20and%20fat-1.png)<!-- -->
 
 Most products contain few fat and and saturated fat. Two products seem to contain a high amount of saturated fat.
 
@@ -572,45 +528,39 @@ One of the strongest relationship was between **fat** and **saturated fat** (r =
 Multivariate Plots Section
 ==========================
 
-    ## Warning: Removed 21 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Density%20plot%20carbohydrates%20food%20category-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Density%20plot%20carbohydrates%20food%20category-1.png)<!-- -->
 
 The food types show distinctly different distributions. **Beverages** only contain about 15 gram of **carbohydrates**. Sugary snacks are heavy in carbohydrates. **Milk and dairy products** are very low in carbohydrates.
 
-    ## Warning: Removed 24 rows containing non-finite values (stat_density).
+![](world_food_facts_eda_files/figure-markdown_github/Carbohydrates,%20brands,%20fat,%20and%20proteins-1.png)<!-- -->
 
-![](README_files/figure-markdown_github/Density%20plot%20sugars%20food%20category-1.png)<!-- -->
+Fatty products are not very high in carbohydrates. No brands differs considerably in products in carbohydrates, fat, or proteins. Sugar is a very crucial carbohydrate in terms of health. Let us have a look.
+
+![](world_food_facts_eda_files/figure-markdown_github/Density%20plot%20sugars%20food%20category-1.png)<!-- -->
 
 The distribution for sugar is sort of similar. Some **beverages** contain a lot of sugar (~80 gram). **Sugary snacks** also contain a lot of sugar.
 
-    ## Warning: Removed 23 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Density%20plot%20proteins%20food%20category-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Density%20plot%20proteins%20food%20category-1.png)<!-- -->
 
 **Milk and dairy products** contain most protein. **Fruits and vegetables** are usually low in protein and also contain a specific amount.
 
-    ## Warning: Removed 23 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Density%20plot%20proteins%20nutrition_grade_fr-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Density%20plot%20proteins%20nutrition_grade_fr-1.png)<!-- -->
 
 Plotting the distribution of **graded products** on **proteins** no specific pattern emerges. The amount of **protein** does not determine wheater a product is considered healthy or not healthy. Indeed healthy products (with an **a**) often do not contain a lot of protein (yellow distribution). The same goes for unhealthy products (with an **e**).
 
-    ## Warning: Removed 305 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Kilocalories%20of%20different%20food%20groups-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Kilocalories%20of%20different%20food%20groups-1.png)<!-- -->
 
 **Fat and sauces** are very heavy in kcals. **Fish, meat, and eggs** usually do not contain a lot kcals.
 
-    ## Warning: Removed 26 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Nutritional%20score%20of%20most%20common%20brands-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Nutritional%20score%20of%20most%20common%20brands-1.png)<!-- -->
 
 Milkbona seems to be the most healthy brand. This is a *biased* representation because Milkbona sells milk products that usually are considered more healthy. Except for **Edeka** every brand has a bimodal distribution. Many products can be considered healthy whereas the other half can be considered unhealthy.
 
-    ## Warning: Removed 195 rows containing non-finite values (stat_density).
+![](world_food_facts_eda_files/figure-markdown_github/Nutritional%20score%20in%20relation%20to%20sugar%20and%20fat-1.png)<!-- -->
 
-![](README_files/figure-markdown_github/Nutritional%20Score%20of%20beverages-1.png)<!-- -->
+Obviously products low in sugar and fat are considered more healthy. This does not come as a surprise.
+
+![](world_food_facts_eda_files/figure-markdown_github/Nutritional%20Score%20of%20beverages-1.png)<!-- -->
 
 It turned out that **alcohol products** do not contain data about the nutritional score. Non-alcoholic beverages show a bimodal distribution. Most drinks are low in nutritional score. Some products are considered unhealthy. Most of these products are lemonades:
 
@@ -631,15 +581,11 @@ It turned out that **alcohol products** do not contain data about the nutritiona
     ## [29] Double Choc Typ Cappucino    
     ## 46765 Levels:    알 통깨 짜왕 너구리 うどん 안성탕면 다진마늘 ... 黑瓶眼药水
 
-    ## Warning: Removed 380 rows containing non-finite values (stat_bin).
-
-![](README_files/figure-markdown_github/Nutrional%20score%20of%20product%20types-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Nutrional%20score%20of%20product%20types-1.png)<!-- -->
 
 **Sugary** snacks obviously are not very healthy. Appart from sugary snacks there is no product type that is of bad nutritional value per se. **Cereals and potatoes** seem to be beneficial for health. The same goes for **Fruits and vegetables**. **Milk and dairy products** have a bimodal distribution. This indicates that half of these products are not very healthy. **Beverages** by and large seem to be reasonably good. The peak of the distribution might be because of **water products**.
 
-    ## Warning: Removed 380 rows containing non-finite values (stat_boxplot).
-
-![](README_files/figure-markdown_github/Boxplots%20of%20food%20types-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Boxplots%20of%20food%20types-1.png)<!-- -->
 
 This plot shows the relationship between the **nutritional grade** and **score variable** on different **product types**. Out of the food types that get a grade **a**, fruits and vegetables are the most healthy. Very few **fats and sauces**, **sugary snacks**, and **beverages** are deemed very healthy.
 
@@ -659,9 +605,7 @@ Final Plots and Summary
 
 ### Plot One
 
-    ## Warning: Removed 380 rows containing non-finite values (stat_boxplot).
-
-![](README_files/figure-markdown_github/unnamed-chunk-1-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Final%20Plot%20One-1.png)<!-- -->
 
 ### Description One
 
@@ -669,9 +613,7 @@ Some food types are more healthy than others. The boxplot depicts this relations
 
 ### Plot Two
 
-    ## Warning: Removed 26 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Plot_Two-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Final%20Plot_Two-1.png)<!-- -->
 
 ### Description Two
 
@@ -679,9 +621,7 @@ There are no brands that are healhy per se. Except for **Edeka** most brands sho
 
 ### Plot Three
 
-    ## Warning: Removed 305 rows containing non-finite values (stat_density).
-
-![](README_files/figure-markdown_github/Plot_Three-1.png)<!-- -->
+![](world_food_facts_eda_files/figure-markdown_github/Final%20Plot%20Three-1.png)<!-- -->
 
 ### Description Three
 

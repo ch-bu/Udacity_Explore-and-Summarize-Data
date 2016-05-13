@@ -3,16 +3,14 @@ author: Christian Burkhart
 output: html_document
 ---
 
-< output:
-  md_document:
-    variant: markdown_github >
+
 
 World Food Facts (Germany)
 ========================================================
 
 This project is part of [Udacity's Nanodegree Data Analyst](https://www.udacity.com/course/data-analyst-nanodegree--nd002). In this project I am carrying out a exploratory data analysis. The project is descriptive and includes univariate, bivariate, and multivariate analyses. I chose a dataset about food products from Germany: The World Food Facts.
 
-The **World Food Facts** dataset is a french initiative. It collects food products from around the world. The dataset is provided by **Open Food Facts** under an [Open Database License](http://opendatacommons.org/licenses/odbl/1.0/) and can be analyzed via [Kaggle](https://www.kaggle.com/openfoodfacts/world-food-facts). Customers and food manufacturers can freely contribute to the dataset.
+The [World Food Facts](http://world.openfoodfacts.org/data) dataset is a french initiative. It collects food products from around the world. The dataset is provided by **Open Food Facts** under an [Open Database License](http://opendatacommons.org/licenses/odbl/1.0/) and can be analyzed via [Kaggle](https://www.kaggle.com/openfoodfacts/world-food-facts). Customers and food manufacturers can freely contribute to the dataset.
 
 In this Exploratory Data Analysis I will try to get some insights into the food products of **Germany**. Being from Germany I am interested in the nutritional value of the products I can find in German supermarkets.
 
@@ -279,13 +277,13 @@ histogram_helper(food_germany$kcal_100g, "kcal_100g", bwidth = 10)
 
 Energy in food is most often measured in **kilojoule**. Customers are usually more accustomed to **kilocalories**. Therefore I created a new variable **kcal_100g** that used the usual [conversion](http://www.rapidtables.com/convert/energy/kj-to-kcal.htm). 
 
-The distribution has three peaks and is skewed left. The mean is `r round(mean(food_germany$kcal_100g, na.rm = TRUE), 2)`. 
+The distribution has three peaks and is skewed left. The mean is `r round(mean(food_germany$kcal_100g, na.rm = TRUE), 2)`. Some products are very high in kcals. Let us see which:
 
 ```{r Products high in kcal}
 filter(food_germany, kcal_100g > 700)$product_name
 ```
 
-Olive oil, sunflower oil and butter are very high in kcals. 
+Looking at the list above olive oil, sunflower oil and butter are very high in kcals. These products are on the right hand side in the histogram above. 
 
 ```{r Histogram salt}
 histogram_helper(food_germany$salt_100g, "salt_100g", bwidth = 1)
@@ -325,14 +323,12 @@ Most products are **dairy products**. **Beverages** and **sugary snacks** come i
 # Univariate Analysis
 
 ### What is the structure of your dataset?
-There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset.
+There are `r nrow(food_germany)` products with `r ncol(food_germany)` features in the dataset. The dataset contains factors and numerics.
 
 ```{r Glimpse at dataset}
 describe(food_germany)
 glimpse(food_germany)
 ```
-
-The dataset contains factors and numerics. The factor's level differ heavily. There are features with just 6 levels and features with over 20,000 levels. 
 
 
 ### What is/are the main feature(s) of interest in your dataset?
@@ -474,6 +470,13 @@ density_plot(food_common$carbohydrates_100g, food_common$pnns_groups_1,
 
 The food types show distinctly different distributions. **Beverages** only contain about 15 gram of **carbohydrates**. Sugary snacks are heavy in carbohydrates. **Milk and dairy products** are very low in carbohydrates.
 
+```{r Carbohydrates, brands, fat, and proteins}
+ggplot(food_common, aes(x = carbohydrates_100g, y = proteins_100g)) +
+  geom_point(aes(colour = brands, size = fat_100g))
+```
+
+Fatty products are not very high in carbohydrates. No brands differs considerably in products in carbohydrates, fat, or proteins. Sugar is a very crucial carbohydrate in terms of health. Let us have a look.
+
 ```{r Density plot sugars food category}
 density_plot(food_common$sugars_100g, food_common$pnns_groups_1, 
              "sugars_100g")
@@ -509,6 +512,13 @@ ggplot(food_common, aes(x = nutrition_score_fr_100g, fill = brands)) +
 ```
 
 Milkbona seems to be the most healthy brand. This is a *biased* representation because Milkbona sells milk products that usually are considered more healthy. Except for **Edeka** every brand has a bimodal distribution. Many products can be considered healthy whereas the other half can be considered unhealthy. 
+
+```{r Nutritional score in relation to sugar and fat}
+ggplot(food_common, aes(x = fat_100g, y = sugars_100g)) +
+    geom_point(alpha = .4, aes(size = nutrition_score_fr_100g, color = COLOR_FILL))
+```
+
+Obviously products low in sugar and fat are considered more healthy. This does not come as a surprise.
 
 ```{r Nutritional Score of beverages}
 # Get rows containing beverages
